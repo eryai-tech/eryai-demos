@@ -21,17 +21,19 @@ export default function DemoPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [sessionId, setSessionId] = useState(null)
+  const [greetingLoaded, setGreetingLoaded] = useState(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Fetch greeting immediately when page loads
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (slug && config && !greetingLoaded) {
       fetchGreeting()
     }
-  }, [isOpen])
+  }, [slug, config])
 
   const fetchGreeting = async () => {
     try {
@@ -41,7 +43,10 @@ export default function DemoPage() {
         body: JSON.stringify({ slug, prompt: '__greeting__' })
       })
       const data = await res.json()
-      if (data.greeting) setMessages([{ role: 'assistant', content: data.greeting }])
+      if (data.greeting) {
+        setMessages([{ role: 'assistant', content: data.greeting }])
+        setGreetingLoaded(true)
+      }
       if (data.sessionId) setSessionId(data.sessionId)
     } catch (err) { console.error(err) }
   }
@@ -67,7 +72,7 @@ export default function DemoPage() {
     } finally { setLoading(false) }
   }
 
-  if (!config) return <div style={{ padding: '40px', textAlign: 'center', color: '#fff', background: '#1a1a1a', minHeight: '100vh' }}><h1>Demo hittades inte</h1><Link href="/" style={{ color: '#4CAF50' }}>← Tillbaka</Link></div>
+  if (!config) return <div style={{ padding: '40px', textAlign: 'center', color: '#fff', background: '#1a1a1a', minHeight: '100vh' }}><h1>Demo hittades inte</h1><Link href="/" style={{ color: '#7c3aed' }}>← Tillbaka</Link></div>
 
   const isRestaurant = config.type === 'restaurant'
 
